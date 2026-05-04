@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 asgiref==3.8.1
 crispy-bootstrap5==2025.6
 dj-database-url==3.0.0
@@ -12,4 +13,20 @@ python-dotenv==1.1.0
 sqlparse==0.5.3
 typing_extensions==4.14.0
 tzdata==2025.2
+=======
+asgiref==3.8.1
+crispy-bootstrap5==2025.6
+dj-database-url==3.0.0
+Django==5.2.3
+django-crispy-forms==2.4
+gunicorn==23.0.0
+packaging==25.0
+pillow==11.2.1
+psycopg2-binary==2.9.10
+python-decouple==3.8
+python-dotenv==1.1.0
+sqlparse==0.5.3
+typing_extensions==4.14.0
+tzdata==2025.2
+>>>>>>> 88694c2bfbbaa9980f7a113fde0af2e7ec55e8e1
 whitenoise==6.9.0
