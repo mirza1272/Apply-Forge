@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Profile - ApplyForge{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card border-0 animate__animated animate__fadeIn" data-aos="fade-up"
+                 style="background: var(--glass-bg); backdrop-filter: blur(12px); color: var(--text-color); border-radius: 1rem; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);">
+
+                <div class="card-header text-white text-center py-4"
+                     style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                    <h4 class="mb-0">My Profile</h4>
+                </div>
+
+                <div class="card-body p-5">
+                    {% if is_employer %}
+                        <h5 class="mb-4 text-primary">Company Profile</h5>
+                        <form method="post" enctype="multipart/form-data" class="animate__animated animate__fadeIn animate__delay-1s">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-lg glow-btn"
+                                        style="background: var(--primary); color: #fff; border-radius: 50px; position: relative; overflow: hidden;">
+                                    <i class="bi bi-save me-2"></i> Update Profile
+                                    <span class="shine"></span>
+                                </button>
+                            </div>
+                        </form>
+
+                    {% elif is_jobseeker %}
+                        <h5 class="mb-4 text-primary">Job Seeker Profile</h5>
+                        <form method="post" enctype="multipart/form-data" class="animate__animated animate__fadeIn animate__delay-1s">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-lg glow-btn"
+                                        style="background: var(--primary); color: #fff; border-radius: 50px; position: relative; overflow: hidden;">
+                                    <i class="bi bi-save me-2"></i> Update Profile
+                                    <span class="shine"></span>
+                                </button>
+                            </div>
+                        </form>
+
+                    {% else %}
+                        <p class="text-muted">No profile information available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Error text for dark mode */
+.form-text,
+.invalid-feedback,
+.help-block,
+.errorlist li {
+    color: var(--text-color) !important;
+    font-size: 0.9rem;
+}
+.errorlist {
+    list-style: none;
+    padding-left: 0;
+}
+
+/* Glowing update button */
+.glow-btn {
+    box-shadow: 0 0 10px rgba(138, 99, 229, 0.6), 0 0 20px rgba(138, 99, 229, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+.glow-btn:hover {
+    box-shadow: 0 0 15px rgba(138, 99, 229, 0.9), 0 0 30px rgba(138, 99, 229, 0.7);
+}
+.glow-btn .shine {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    animation: shineMove 2.5s infinite;
+}
+@keyframes shineMove {
+    0% { left: -75%; }
+    50% { left: 125%; }
+    100% { left: 125%; }
+}
+</style>
+{% endblock %}

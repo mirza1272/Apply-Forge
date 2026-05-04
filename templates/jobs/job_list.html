@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Job Listings - ApplyForge{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Filters -->
+        <div class="col-md-4 col-lg-3">
+            <div class="card mb-4 border-0 shadow-sm" data-aos="fade-right">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="mb-3">
+                            <label for="q" class="form-label">Keywords</label>
+                            <input type="text" class="form-control" id="q" name="q" value="{{ search_query }}" placeholder="Job title, company">
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ location_query }}" placeholder="City, country">
+                        </div>
+                        <div class="mb-3">
+                            <label for="type" class="form-label">Job Type</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="">All Types</option>
+                                <option value="FULL_TIME" {% if job_type_query == 'FULL_TIME' %}selected{% endif %}>Full Time</option>
+                                <option value="PART_TIME" {% if job_type_query == 'PART_TIME' %}selected{% endif %}>Part Time</option>
+                                <option value="CONTRACT" {% if job_type_query == 'CONTRACT' %}selected{% endif %}>Contract</option>
+                                <option value="INTERNSHIP" {% if job_type_query == 'INTERNSHIP' %}selected{% endif %}>Internship</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category_query == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a href="{% url 'job_list' %}" class="btn btn-outline-secondary w-100 mt-2">Reset</a>
+                    </form>
+                </div>
+            </div>
+
+            {% if user.is_authenticated and user.role == 'EMPLOYER' %}
+            <div class="d-grid" data-aos="fade-right" data-aos-delay="100">
+                <a href="{% url 'create_job' %}" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-2"></i> Post a Job
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Job Listings -->
+        <div class="col-md-8 col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-left">
+                <h2 class="fw-bold mb-0">Job Listings</h2>
+                <p class="text-muted mb-0">{{ jobs.count }} jobs found</p>
+            </div>
+
+            {% if jobs %}
+            <div class="row">
+                {% for job in jobs %}
+                <div class="col-md-12 mb-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter }}00">
+                    <div class="hover-shadow job-card d-flex align-items-center p-3 px-4 rounded shadow-sm">
+                        {% if job.company.logo %}
+                            <img src="{{ job.company.logo.url }}" alt="{{ job.company.name }}" class="job-logo me-3">
+                        {% else %}
+                            <div class="job-logo no-logo me-3">
+                                {{ job.company.name|slice:":2"|upper }}
+                            </div>
+                        {% endif %}
+
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ job.title }}</h5>
+                            <p class="text-muted mb-1 small">{{ job.company.name }} • <i class="bi bi-geo-alt"></i> {{ job.location }}</p>
+                            <div class="d-flex gap-2 align-items-center small">
+                                <span class="badge bg-purple text-white">{{ job.get_job_type_display }}</span>
+                                {% if job.salary_range %}
+                                <span class="text-success"><i class="bi bi-cash"></i> {{ job.salary_range }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="text-end ms-auto">
+                            <p class="text-muted small mb-2">Posted {{ job.created_at|timesince }} ago</p>
+                            <a href="{% url 'job_detail' job.pk %}" class="btn btn-sm btn-outline-purple rounded-pill">View Details</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info" data-aos="fade-left">
+                No jobs found matching your criteria. Try adjusting your filters.
+            </div>
+            {% endif %}
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav class="mt-4" data-aos="fade-up">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+.job-card {
+    background-color: #1f1f1f;
+    border: 1px solid #333;
+    border-left: 5px solid #a855f7;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+.job-card:hover {
+    box-shadow: 50px 50px 50px #a855f7;
+    transform: translateY(-5px);
+}
+.job-logo {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #2d2d2d;
+}
+.no-logo {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background-color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-weight: bold;
+}
+.bg-purple {
+    background-color: #a855f7 !important;
+}
+.btn-outline-purple {
+    border: 2px solid #a855f7;
+    color: #a855f7;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.btn-outline-purple:hover {
+    background-color: #a855f7;
+    color: #fff;
+}
+</style>
+{% endblock %}

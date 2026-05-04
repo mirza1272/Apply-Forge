@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - ApplyForge{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-0 animate__animated animate__fadeIn" data-aos="fade-up"
+                 style="background: var(--glass-bg); backdrop-filter: blur(12px); color: var(--text-color); border-radius: 1rem; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);">
+
+                <div class="card-header text-white text-center py-4"
+                     style="background: linear-gradient(135deg, var(--primary), var(--primary-hover)); border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                    <h4 class="mb-0 animate__animated animate__fadeInDown">Create Your Account</h4>
+                </div>
+
+                <div class="card-body p-5">
+                    <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-1s">
+                        <img src="{% static 'images/register-illustration.png' %}" alt="Register" class="img-fluid" style="max-height: 150px;">
+                    </div>
+
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" novalidate class="animate__animated animate__fadeIn animate__delay-2s">
+                        {% csrf_token %}
+
+                        <h5 class="mb-4 text-primary">Account Information</h5>
+                        {{ user_form|crispy }}
+
+                        <div id="employer-fields" style="display: none;">
+                            <h5 class="mt-5 mb-4 text-primary">Company Information</h5>
+                            {{ company_form|crispy }}
+                        </div>
+
+                        <div id="jobseeker-fields" style="display: none;">
+                            <h5 class="mt-5 mb-4 text-primary">Profile Information</h5>
+                            {{ profile_form|crispy }}
+                        </div>
+
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                            <label class="form-check-label" for="termsCheck">
+                                I agree to the <a href="#" style="color: var(--primary);">Terms of Service</a> and <a href="#" style="color: var(--primary);">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-lg glow-btn"
+                                    style="background: var(--primary); color: #fff; border-radius: 50px; position: relative; overflow: hidden;">
+                                <i class="bi bi-person-plus me-2"></i> Register
+                                <span class="shine"></span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 text-center animate__animated animate__fadeInUp animate__delay-3s">
+                        <p class="mb-0">Already have an account? 
+                            <a href="{% url 'login' %}" class="fw-bold" style="color: var(--primary);">Login here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Fix error/help text visibility */
+.form-text,
+.invalid-feedback,
+.help-block,
+.errorlist li {
+    color: var(--text-color) !important;
+    font-size: 0.9rem;
+}
+.errorlist {
+    list-style: none;
+    padding-left: 0;
+}
+
+/* Shiny button glow effect */
+.glow-btn {
+    box-shadow: 0 0 10px rgba(138, 99, 229, 0.6), 0 0 20px rgba(138, 99, 229, 0.4);
+    transition: all 0.3s ease-in-out;
+}
+.glow-btn:hover {
+    box-shadow: 0 0 15px rgba(138, 99, 229, 0.9), 0 0 30px rgba(138, 99, 229, 0.7);
+}
+.glow-btn .shine {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-20deg);
+    animation: shineMove 2.5s infinite;
+}
+@keyframes shineMove {
+    0% { left: -75%; }
+    50% { left: 125%; }
+    100% { left: 125%; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('#id_role');
+    const employerFields = document.getElementById('employer-fields');
+    const jobseekerFields = document.getElementById('jobseeker-fields');
+
+    function toggleFields() {
+        const selectedRole = roleSelect.value;
+
+        if (selectedRole === 'EMPLOYER') {
+            employerFields.style.display = 'block';
+            jobseekerFields.style.display = 'none';
+            document.querySelectorAll('#employer-fields input, #employer-fields select, #employer-fields textarea').forEach(el => el.required = true);
+            document.querySelectorAll('#jobseeker-fields input, #jobseeker-fields select, #jobseeker-fields textarea').forEach(el => el.required = false);
+        } else if (selectedRole === 'JOBSEEKER') {
+            employerFields.style.display = 'none';
+            jobseekerFields.style.display = 'block';
+            document.querySelectorAll('#jobseeker-fields input, #jobseeker-fields select, #jobseeker-fields textarea').forEach(el => el.required = true);
+            document.querySelectorAll('#employer-fields input, #employer-fields select, #employer-fields textarea').forEach(el => el.required = false);
+        } else {
+            employerFields.style.display = 'none';
+            jobseekerFields.style.display = 'none';
+        }
+    }
+
+    roleSelect.addEventListener('change', toggleFields);
+    toggleFields();
+
+    {% if user_form.errors or company_form.errors or profile_form.errors %}
+        const errorRole = "{{ user_form.role.value|default:'' }}";
+        if (errorRole) {
+            roleSelect.value = errorRole;
+            toggleFields();
+        }
+    {% endif %}
+});
+</script>
+{% endblock %}

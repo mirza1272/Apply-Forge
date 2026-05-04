@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Apply for {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-lg animate__animated animate__fadeInUp" 
+                 style="background: var(--glass-bg); backdrop-filter: blur(12px); color: var(--text-color);">
+                
+                <div class="card-header text-white" 
+                     style="background: var(--primary); border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+                    <h4 class="mb-0">Apply for {{ job.title }}</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-info d-flex align-items-center gap-2" 
+                         style="background: rgba(14, 197, 233, 0.1); border: 1px solid var(--info); color: var(--info);">
+                        <i class="bi bi-info-circle fs-4"></i>
+                        <div>
+                            <h5 class="mb-1 fw-semibold">Application Information</h5>
+                            <p class="mb-0">You're applying to <strong>{{ job.title }}</strong> at <strong>{{ job.company.name }}</strong>.</p>
+                        </div>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'job_detail' job.pk %}" class="btn btn-outline-light">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary shadow-sm">
+                                <i class="bi bi-send-check me-1"></i> Submit Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

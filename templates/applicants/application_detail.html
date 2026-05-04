@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Application Details - ApplyForge{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
+        <div>
+            <h1 class="fw-bold text-white">Application Details</h1>
+            <h4 class="text-muted">{{ application.job.title }} at {{ application.job.company.name }}</h4>
+        </div>
+        <a href="{% url 'my_applications' %}" class="btn btn-outline-light">Back to Applications</a>
+    </div>
+
+    <div class="row">
+        <!-- LEFT: Application -->
+        <div class="col-md-8">
+            <div class="card mb-4 border-0 shadow-lg" data-aos="fade-up"
+                 style="background: var(--glass-bg); color: var(--text-color); backdrop-filter: blur(12px);">
+                <div class="card-header border-0 text-white"
+                     style="background: var(--primary); border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+                    <h5 class="mb-0">Cover Letter</h5>
+                </div>
+                <div class="card-body">
+                    {{ application.cover_letter|linebreaks }}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-lg" data-aos="fade-up" data-aos-delay="100"
+                 style="background: var(--glass-bg); color: var(--text-color); backdrop-filter: blur(12px);">
+                <div class="card-header border-0 text-white"
+                     style="background: var(--primary-hover); border-top-left-radius: .5rem; border-top-right-radius: .5rem;">
+                    <h5 class="mb-0">Job Details</h5>
+                </div>
+                <div class="card-body">
+                    <h5>{{ application.job.title }}</h5>
+                    <p class="text-muted">{{ application.job.company.name }}</p>
+
+                    <div class="mb-3">
+                        <span class="badge bg-primary-soft text-primary me-2">{{ application.job.get_job_type_display }}</span>
+                        <span class="text-muted"><i class="bi bi-geo-alt"></i> {{ application.job.location }}</span>
+                    </div>
+
+                    <div class="job-description">
+                        {{ application.job.description|linebreaks }}
+                    </div>
+
+                    <a href="{% url 'job_detail' application.job.pk %}" class="btn btn-outline-primary mt-3">View Job Posting</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Status + Profile -->
+        <div class="col-md-4">
+            <!-- Status Card -->
+            <div class="card mb-4 border-0 shadow-lg" data-aos="fade-up"
+                 style="background: var(--glass-bg); color: var(--text-color); backdrop-filter: blur(12px);">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Application Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <span class="badge 
+                            {% if application.status == 'PENDING' %}bg-primary
+                            {% elif application.status == 'REVIEWED' %}bg-success
+                            {% elif application.status == 'INTERVIEW' %}bg-info
+                            {% elif application.status == 'ACCEPTED' %}bg-success
+                            {% elif application.status == 'REJECTED' %}bg-danger
+                            {% endif %} fs-5 py-2 px-3 rounded-pill">
+                            {{ application.get_status_display }}
+                        </span>
+                    </div>
+
+                    <div class="timeline">
+                        <div class="timeline-item {% if application.status != 'PENDING' %}active{% endif %}">
+                            <div class="timeline-point"></div>
+                            <div class="timeline-content">
+                                <h6>Application Submitted</h6>
+                                <p class="text-muted">{{ application.applied_on|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item {% if application.status in 'REVIEWED INTERVIEW ACCEPTED REJECTED' %}active{% endif %}">
+                            <div class="timeline-point"></div>
+                            <div class="timeline-content">
+                                <h6>Application Reviewed</h6>
+                                {% if application.status != 'PENDING' %}
+                                <p class="text-muted">{{ application.updated_at|date:"M d, Y" }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if application.status == 'INTERVIEW' %}
+                        <div class="timeline-item active">
+                            <div class="timeline-point"></div>
+                            <div class="timeline-content">
+                                <h6>Interview Scheduled</h6>
+                                <p class="text-muted">{{ application.updated_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if application.status == 'ACCEPTED' or application.status == 'REJECTED' %}
+                        <div class="timeline-item active">
+                            <div class="timeline-point"></div>
+                            <div class="timeline-content">
+                                <h6>Decision Made</h6>
+                                <p class="text-muted">{{ application.updated_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Card -->
+            <div class="card border-0 shadow-lg" data-aos="fade-up" data-aos-delay="100"
+                 style="background: var(--glass-bg); color: var(--text-color); backdrop-filter: blur(12px);">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Your Profile</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Resume</h6>
+                    {% if application.profile.resume %}
+                    <a href="{{ application.profile.resume.url }}" target="_blank" class="btn btn-outline-primary w-100 mb-3">
+                        <i class="bi bi-download"></i> Download Resume
+                    </a>
+                    {% else %}
+                    <p class="text-muted">No resume uploaded</p>
+                    {% endif %}
+
+                    <h6 class="mt-4">Skills</h6>
+                    <p>{{ application.profile.skills|default:"Not specified" }}</p>
+
+                    <h6 class="mt-4">Experience</h6>
+                    <p>{{ application.profile.experience|default:"Not specified"|linebreaks }}</p>
+
+                    <h6 class="mt-4">Education</h6>
+                    <p>{{ application.profile.education|default:"Not specified"|linebreaks }}</p>
+
+                    <a href="{% url 'profile' %}" class="btn btn-outline-secondary w-100 mt-3">Update Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Timeline styles */
+.timeline {
+    position: relative;
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 3px solid var(--primary-light);
+}
+.timeline-item {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+.timeline-item .timeline-point {
+    position: absolute;
+    left: -12px;
+    top: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--text-muted);
+}
+.timeline-item.active .timeline-point {
+    background: var(--primary);
+}
+</style>
+{% endblock %}
